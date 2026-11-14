@@ -1,4 +1,4 @@
-# Meu projeto
+# kaell-blog
 
 Um blog para compartilhar coisas
 
@@ -10,3 +10,4 @@ Um blog para compartilhar coisas
 ## Funcionalidades
 
 - Navegação entre páginas e textos
+- Layout responsivo
