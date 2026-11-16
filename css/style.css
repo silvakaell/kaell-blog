@@ -143,6 +143,32 @@ main h1 {
     line-height: 1.8;
 }
 
+.form-publicacao {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-publicacao input,
+.form-publicacao textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #CCC8BC;
+    font-size:  16px;
+
+
+}
+
+.form-publicacao button {
+    background-color: #4B6651;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    cursor: pointer;
+    align-self: flex-end;
+}
+
 @media (max-width: 600px) {
     header {
         flex-direction: column;
