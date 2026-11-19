@@ -3,10 +3,27 @@ const campoConteudo = document.querySelector("#conteudo");
 const formulario = document.querySelector("#form-publicacao");
 const listaPublicacoes = document.querySelector("#lista-publicacoes");
 const botaoPublicar = formulario.querySelector('button[type="submit"]');
+const botaoCancelar = document.querySelector("#btn-cancelar");
 
 const publicacoes = [];
 let publicacaoEmEdicao = null
 let artigoEmEdicao = null
+
+function cancelarEdicao() {
+    publicacaoEmEdicao = null;
+    artigoEmEdicao = null;
+
+    formulario.reset();
+
+    botaoPublicar.textContent = "Publicar texto";
+    botaoCancelar.hidden = true;
+}
+
+botaoCancelar.addEventListener("click", function() {
+
+   cancelarEdicao();
+
+});
 
 formulario.addEventListener("submit", function(evento) {
     evento.preventDefault();
@@ -48,7 +65,8 @@ formulario.addEventListener("submit", function(evento) {
     botaoEditar.type = "button";
 
     botaoEditar.addEventListener("click", function() {
-        
+
+        botaoCancelar.hidden = false;
         publicacaoEmEdicao = publicacao;
         artigoEmEdicao = novoArtigo;
         campoTitulo.value = publicacao.titulo;
@@ -74,7 +92,12 @@ formulario.addEventListener("submit", function(evento) {
         novoArtigo.remove();
     }
 
+    if (publicacaoEmEdicao === publicacao) {
+        cancelarEdicao();
+}
+
 });
+
 
     tituloArtigo.textContent = publicacao.titulo;
     conteudoArtigo.textContent = publicacao.conteudo;
