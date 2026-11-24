@@ -9,6 +9,21 @@ const publicacoes = [];
 let publicacaoEmEdicao = null
 let artigoEmEdicao = null
 
+function exibirPublicacao(publicacao) {
+
+    const novoArtigo = document.createElement("article");
+    const tituloArtigo = document.createElement("h3");
+    const conteudoArtigo = document.createElement("p");
+
+    tituloArtigo.textContent = publicacao.titulo;
+    conteudoArtigo.textContent = publicacao.conteudo;
+
+    novoArtigo.appendChild(tituloArtigo);
+    novoArtigo.appendChild(conteudoArtigo);
+
+    listaPublicacoes.appendChild(novoArtigo);
+}
+
 function cancelarEdicao() {
     publicacaoEmEdicao = null;
     artigoEmEdicao = null;
@@ -25,7 +40,7 @@ botaoCancelar.addEventListener("click", function() {
 
 });
 
-formulario.addEventListener("submit", function(evento) {
+formulario.addEventListener("submit", async function(evento) {
     evento.preventDefault();
     botaoPublicar.textContent = "Publicar artigo";
 
@@ -42,11 +57,45 @@ formulario.addEventListener("submit", function(evento) {
 
     console.log("Publicações atualizadas:", publicacoes);
 
-    publicacaoEmEdicao = null;
     formulario.reset();
 
     return;
 }
+
+    formulario.addEventListener("submit", async function(evento) {
+    evento.preventDefault();
+
+    // 1. Se estamos editando, executar o código de edição
+    if (publicacaoEmEdicao !== null) {
+
+        // Mantenha aqui o seu código antigo de edição
+
+        return;
+    }
+
+    // 2. Se NÃO estamos editando, criar uma publicação pela API
+    const resposta = await fetch("/api/publicacoes", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            titulo: campoTitulo.value,
+            conteudo: campoConteudo.value
+        })
+    });
+
+    if (!resposta.ok) {
+        console.error("Erro ao publicar:", resposta.status);
+        return;
+    }
+
+    const novaPublicacao = await resposta.json();
+
+    exibirPublicacao(novaPublicacao);
+
+    formulario.reset();
+});
 
     const publicacao = {
         titulo: campoTitulo.value,
@@ -111,8 +160,25 @@ formulario.addEventListener("submit", function(evento) {
 
     console.log(publicacoes);
 
-    formulario.reset();
+}); 
 
+
+
+async function carregarPublicacoes() {
+
+    const resposta = await fetch("/api/publicacoes");
+
+    const dados = await resposta.json();
+
+    dados.forEach(function(publicacao) {
+    exibirPublicacao(publicacao);
 
 });
+
+    console.log("Publicações recebidas da API:", dados);
+
+}
+
+
+carregarPublicacoes();
 

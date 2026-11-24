@@ -1,8 +1,6 @@
 import express from "express";
 
-const app = express();
-
-app.use(express.json());
+import { fileURLToPath } from "node:url";
 
 const rota = 3000
 
@@ -13,6 +11,18 @@ const publicacoes = [
 
 
 let proximoId = 3;
+
+const app = express();
+
+app.use("/css", express.static(
+    fileURLToPath(new URL("../css/", import.meta.url))
+));
+
+app.use("/js", express.static(
+    fileURLToPath(new URL("../js/", import.meta.url))
+));
+
+app.use(express.json());
 
 app.get("/", function(req, res) {
     res.send("Olá! Meu servidor está funcionando!");
@@ -98,7 +108,11 @@ app.delete("/api/publicacoes/:id", function(req, res) {
     });
 
 });
-
+app.get("/gerenciador.html", function(req, res) {
+    res.sendFile(
+        fileURLToPath(new URL("../gerenciador.html", import.meta.url))
+    );
+});
 
 app.listen(rota, function() {
     console.log("Servidor rodando na porta 3000!");
