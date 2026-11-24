@@ -11,6 +11,8 @@ let artigoEmEdicao = null
 
 function exibirPublicacao(publicacao) {
 
+    
+
     const novoArtigo = document.createElement("article");
     const tituloArtigo = document.createElement("h3");
     const conteudoArtigo = document.createElement("p");
@@ -20,6 +22,58 @@ function exibirPublicacao(publicacao) {
 
     novoArtigo.appendChild(tituloArtigo);
     novoArtigo.appendChild(conteudoArtigo);
+
+    const botaoEditar = document.createElement("button");
+
+    botaoEditar.textContent = "Editar";
+    botaoEditar.type = "button";
+    
+    botaoEditar.addEventListener("click", function() {
+    publicacaoEmEdicao = publicacao;
+    artigoEmEdicao = novoArtigo;
+
+    campoTitulo.value = publicacao.titulo;
+    campoConteudo.value = publicacao.conteudo;
+
+    botaoPublicar.textContent = "Salvar alterações";
+    botaoCancelar.hidden = false;
+});
+
+    novoArtigo.appendChild(botaoEditar);
+
+    const botaoExcluir = document.createElement("button");
+
+    botaoExcluir.textContent = "Excluir";
+    botaoExcluir.type = "button";  
+
+    botaoExcluir.addEventListener("click", async function() {
+
+    const confirmar = confirm("Tem certeza que deseja excluir este artigo?");
+
+    if (!confirmar) {
+        return;
+    }
+
+    const resposta = await fetch(
+        `/api/publicacoes/${publicacao.id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    if (!resposta.ok) {
+        console.error("Erro ao excluir:", resposta.status);
+        return;
+    }
+
+    novoArtigo.remove();
+
+    if (publicacaoEmEdicao === publicacao) {
+        cancelarEdicao();
+    }
+});
+
+    novoArtigo.appendChild(botaoExcluir);
 
     listaPublicacoes.appendChild(novoArtigo);
 }
@@ -44,34 +98,42 @@ formulario.addEventListener("submit", async function(evento) {
     evento.preventDefault();
     botaoPublicar.textContent = "Publicar artigo";
 
-    if (publicacaoEmEdicao !== null) {
+   if (publicacaoEmEdicao !== null) {
 
-    publicacaoEmEdicao.titulo = campoTitulo.value;
-    publicacaoEmEdicao.conteudo = campoConteudo.value;
+    const resposta = await fetch(
+        `/api/publicacoes/${publicacaoEmEdicao.id}`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                titulo: campoTitulo.value,
+                conteudo: campoConteudo.value
+            })
+        }
+    );
 
-    artigoEmEdicao.querySelector("h3").textContent = publicacaoEmEdicao.titulo;
-    artigoEmEdicao.querySelector("p").textContent = publicacaoEmEdicao.conteudo;
+    if (!resposta.ok) {
+        console.error("Erro ao editar:", resposta.status);
+        return;
+    }
 
-    publicacaoEmEdicao = null;
-    artigoEmEdicao = null;
+    const publicacaoAtualizada = await resposta.json();
 
-    console.log("Publicações atualizadas:", publicacoes);
+    publicacaoEmEdicao.titulo = publicacaoAtualizada.titulo;
+    publicacaoEmEdicao.conteudo = publicacaoAtualizada.conteudo;
 
-    formulario.reset();
+    artigoEmEdicao.querySelector("h3").textContent =
+        publicacaoAtualizada.titulo;
+
+    artigoEmEdicao.querySelector("p").textContent =
+        publicacaoAtualizada.conteudo;
+
+    cancelarEdicao();
 
     return;
 }
-
-    formulario.addEventListener("submit", async function(evento) {
-    evento.preventDefault();
-
-    // 1. Se estamos editando, executar o código de edição
-    if (publicacaoEmEdicao !== null) {
-
-        // Mantenha aqui o seu código antigo de edição
-
-        return;
-    }
 
     // 2. Se NÃO estamos editando, criar uma publicação pela API
     const resposta = await fetch("/api/publicacoes", {
@@ -159,9 +221,6 @@ formulario.addEventListener("submit", async function(evento) {
     novoArtigo.appendChild(botaoEditar);
 
     console.log(publicacoes);
-
-}); 
-
 
 
 async function carregarPublicacoes() {
