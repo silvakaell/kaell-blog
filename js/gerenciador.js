@@ -9,6 +9,18 @@ const publicacoes = [];
 let publicacaoEmEdicao = null
 let artigoEmEdicao = null
 
+async function obterTokenCsrf() {
+    const resposta = await fetch("/api/csrf");
+
+    if (!resposta.ok) {
+        throw new Error("Não foi possível obter o token CSRF.");
+    }
+
+    const dados = await resposta.json();
+
+    return dados.csrfToken;
+}
+
 function exibirPublicacao(publicacao) {
 
     
@@ -53,11 +65,14 @@ function exibirPublicacao(publicacao) {
     if (!confirmar) {
         return;
     }
-
+    const csrfToken = await obterTokenCsrf();
     const resposta = await fetch(
         `/api/publicacoes/${publicacao.id}`,
         {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+            "X-CSRF-Token": csrfToken,
+        }
         }
     );
 
@@ -100,12 +115,15 @@ formulario.addEventListener("submit", async function(evento) {
 
    if (publicacaoEmEdicao !== null) {
 
+    const csrfToken = await obterTokenCsrf();
     const resposta = await fetch(
         `/api/publicacoes/${publicacaoEmEdicao.id}`,
         {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-CSRF-Token": csrfToken
+                
             },
             body: JSON.stringify({
                 titulo: campoTitulo.value,
@@ -134,17 +152,19 @@ formulario.addEventListener("submit", async function(evento) {
 
     return;
 }
+    const csrfToken = await obterTokenCsrf();
 
     const resposta = await fetch("/api/publicacoes", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            titulo: campoTitulo.value,
-            conteudo: campoConteudo.value
-        })
-    });
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken
+    },
+    body: JSON.stringify({
+        titulo: campoTitulo.value,
+        conteudo: campoConteudo.value
+    })
+});
 
     if (!resposta.ok) {
         console.error("Erro ao publicar:", resposta.status);
@@ -237,6 +257,29 @@ async function carregarPublicacoes() {
 
 }
 
+const botaoSair = document.querySelector("#btn-sair");
+
+botaoSair.addEventListener("click", async function() {
+    try {
+        const csrfToken = await obterTokenCsrf();
+
+        const resposta = await fetch("/api/logout", {
+            method: "POST",
+            headers: {
+                "X-CSRF-Token": csrfToken
+            }
+        });
+
+        if (!resposta.ok) {
+            throw new Error("Erro ao sair da conta");
+        }
+
+        window.location.replace("/login.html");
+
+    } catch (erro) {
+        console.error("Erro no logout:", erro);
+        alert("Não foi possível sair da conta.");
+    }
+});
 
 carregarPublicacoes();
-

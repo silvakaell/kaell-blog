@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | kaell silva</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <main>
+        <h1>Área administrativa</h1>
+
+        <p>Entre com suas credenciais para gerenciar o blog.</p>
+
+        <form id="form-login">
+
+            <label for="usuario">Usuário</label>
+            <input
+                type="text"
+                id="usuario"
+                name="usuario"
+                autocomplete="username"
+                required
+            >
+
+            <label for="senha">Senha</label>
+            <input
+                type="password"
+                id="senha"
+                name="senha"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit">Entrar</button>
+
+        </form>
+
+        <p id="mensagem-login" role="status"></p>
+
+        <a href="/index.html">← Voltar ao blog</a>
+    </main>
+
+    <script src="/js/login.js"></script>
+
+</body>
+</html>

@@ -186,6 +186,16 @@ main h1 {
     font-size: 0.9rem;
     opacity: 0.75;
 }
+#lista-textos-recentes time {
+    display: block;
+    margin-top: 6px;
+    color: #68695F;
+    font-size: 0.9rem;
+}
+
+#lista-textos-recentes article {
+    margin-bottom: 20px;
+}
 
 @media (max-width: 600px) {
     header {
