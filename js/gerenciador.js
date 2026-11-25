@@ -135,7 +135,6 @@ formulario.addEventListener("submit", async function(evento) {
     return;
 }
 
-    // 2. Se NÃO estamos editando, criar uma publicação pela API
     const resposta = await fetch("/api/publicacoes", {
         method: "POST",
         headers: {

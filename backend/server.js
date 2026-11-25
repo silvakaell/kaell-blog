@@ -2,15 +2,9 @@ import express from "express";
 
 import { fileURLToPath } from "node:url";
 
+import { pool } from "./db.js";
+
 const rota = 3000
-
-const publicacoes = [
-    { id: 1, titulo: "Artigo A", conteudo: "Texto A" },
-    { id: 2, titulo: "Artigo B", conteudo: "Texto B" }
-];
-
-
-let proximoId = 3;
 
 const app = express();
 
@@ -33,84 +27,184 @@ app.get("/sobre", function(req, res) {
 });
 
 
-app.get("/api/publicacoes", function(req, res) {
-    res.json(publicacoes)
+app.get("/api/publicacoes", async function(req, res) {
+    try {
+        const resultado = await pool.query(
+    "SELECT * FROM publicacoes ORDER BY criado_em DESC, id DESC"
+);
+
+        res.json(resultado.rows);
+
+    } catch (erro) {
+        console.error("Erro ao consultar PostgreSQL:", erro);
+
+        res.status(500).json({
+            erro: "Não foi possível buscar as publicações."
+        });
+    }
 });
 
-app.post("/api/publicacoes", function(req, res) {
-    const novaPublicacao = {
-    id: proximoId,
-    titulo: req.body.titulo,
-    conteudo: req.body.conteudo
-};
-    if (!novaPublicacao.titulo || !novaPublicacao.conteudo) {
-    return res.status(400).json({
-        erro: "Título e conteúdo são obrigatórios."
-    });
-};
-    proximoId++;
-    publicacoes.push(novaPublicacao);
-    res.json(novaPublicacao);
-    res.status(201).json(novaPublicacao)
-});
-app.get("/api/publicacoes/:id", function(req, res) {
-    const id = Number(req.params.id);
-    const publicacao = publicacoes.find(function(item) {
-        return item.id === id;
-    });
+app.post("/api/publicacoes", async function(req, res) {
 
-    if (!publicacao) {
-    return res.status(404).json({
-        erro: "Publicação não encontrada."
-    });
-}
-    res.json(publicacao);
+    const { titulo, conteudo } = req.body;
 
-});
-
-app.put("/api/publicacoes/:id", function(req, res) {
-    const id = Number(req.params.id);
-    const publicacao = publicacoes.find(function(item) {
-        return item.id === id;
-    });
-    if (!publicacao) {
-        return res.status(404).json({
-            erro: "Publicação não encontrada."
+    if (!titulo || !conteudo) {
+        return res.status(400).json({
+            erro: "Título e conteúdo são obrigatórios."
         });
     }
 
-    if (!req.body.titulo || !req.body.conteudo) {
-    return res.status(400).json({
-        erro: "Título e conteúdo são obrigatórios."
-    });
-}
-    publicacao.titulo = req.body.titulo;
-    publicacao.conteudo = req.body.conteudo;
-    res.json(publicacao);
+    try {
+        const resultado = await pool.query(
+            `INSERT INTO publicacoes (titulo, conteudo)
+             VALUES ($1, $2)
+             RETURNING id, titulo, conteudo`,
+            [titulo, conteudo]
+        );
 
+        res.status(201).json(resultado.rows[0]);
+
+    } catch (erro) {
+        console.error("Erro ao cadastrar publicação:", erro);
+
+        res.status(500).json({
+            erro: "Não foi possível cadastrar a publicação."
+        });
+    }
+});
+
+app.get("/api/publicacoes/:id", async function(req, res) {
+
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+            erro: "ID inválido."
+        });
+    }
+
+    try {
+        const resultado = await pool.query(
+            "SELECT * FROM publicacoes WHERE id = $1",
+            [id]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({
+                erro: "Publicação não encontrada."
+            });
+        }
+
+        res.json(resultado.rows[0]);
+
+    } catch (erro) {
+        console.error("Erro ao buscar publicação:", erro);
+
+        res.status(500).json({
+            erro: "Não foi possível buscar a publicação."
+        });
+    }
+});
+
+app.put("/api/publicacoes/:id", async function(req, res) {
+
+    const id = Number(req.params.id);
+    const { titulo, conteudo } = req.body;
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+            erro: "ID inválido."
+        });
+    }
+
+    if (!titulo || !conteudo) {
+        return res.status(400).json({
+            erro: "Título e conteúdo são obrigatórios."
+        });
+    }
+
+    try {
+        const resultado = await pool.query(
+            `UPDATE publicacoes
+             SET titulo = $1, conteudo = $2
+             WHERE id = $3
+             RETURNING id, titulo, conteudo`,
+            [titulo, conteudo, id]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({
+                erro: "Publicação não encontrada."
+            });
+        }
+
+        res.json(resultado.rows[0]);
+
+    } catch (erro) {
+        console.error("Erro ao editar publicação:", erro);
+
+        res.status(500).json({
+            erro: "Não foi possível editar a publicação."
+        });
+    }
 });
 
 
-app.delete("/api/publicacoes/:id", function(req, res) {
-    const id = Number(req.params.id);
-    const indice = publicacoes.findIndex(function(item) {
-        return item.id === id;
-    });
+app.delete("/api/publicacoes/:id", async function(req, res) {
 
-    if (indice === -1) {
-        return res.status(404).json({
-            erro: "Publicação não encontrada."
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+            erro: "ID inválido."
         });
     }
-    publicacoes.splice(indice, 1);
-    res.json({
-        mensagem: "Publicação excluída com sucesso!"
-    });
 
+    try {
+        const resultado = await pool.query(
+            `DELETE FROM publicacoes
+             WHERE id = $1
+             RETURNING id`,
+            [id]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({
+                erro: "Publicação não encontrada."
+            });
+        }
+
+        res.json({
+            mensagem: "Publicação excluída com sucesso!"
+        });
+
+    } catch (erro) {
+        console.error("Erro ao excluir publicação:", erro);
+
+        res.status(500).json({
+            erro: "Não foi possível excluir a publicação."
+        });
+    }
 });
 app.get("/gerenciador.html", function(req, res) {
     res.sendFile(
         fileURLToPath(new URL("../gerenciador.html", import.meta.url))
+    );
+});
+
+app.get("/textos.html", function(req, res) {
+    res.sendFile(
+        fileURLToPath(
+            new URL("../textos.html", import.meta.url)
+        )
+    );
+});
+
+app.get("/artigo.html", function(req, res) {
+    res.sendFile(
+        fileURLToPath(
+            new URL("../artigo.html", import.meta.url)
+        )
     );
 });
 
