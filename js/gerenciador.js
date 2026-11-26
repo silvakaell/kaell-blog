@@ -140,7 +140,9 @@ formulario.addEventListener("submit", async function(evento) {
         );
 
         if (!resposta.ok) {
-            throw new Error("Não foi possível editar o artigo.");
+            const dadosErro = await resposta.json();
+
+            throw new Error(dadosErro.erro);
         }
 
         const publicacaoAtualizada = await resposta.json();
@@ -159,7 +161,7 @@ formulario.addEventListener("submit", async function(evento) {
     } catch (erro) {
         console.error("Erro ao editar:", erro);
 
-        alert("Não foi possível editar o artigo. Tente novamente.");
+        alert(erro.message);
     }
 
     return;
@@ -181,8 +183,10 @@ formulario.addEventListener("submit", async function(evento) {
     });
 
     if (!resposta.ok) {
-        throw new Error("Não foi possível publicar o artigo.");
-    }
+    const dadosErro = await resposta.json();
+
+    throw new Error(dadosErro.erro);
+}
 
     const novaPublicacao = await resposta.json();
 
@@ -193,7 +197,7 @@ formulario.addEventListener("submit", async function(evento) {
 } catch (erro) {
     console.error("Erro ao publicar:", erro);
 
-    alert("Não foi possível publicar o artigo. Tente novamente.");
+    alert(erro.message);
 }
 });
 

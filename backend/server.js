@@ -17,6 +17,16 @@ import { randomBytes } from "node:crypto";
 const rota = Number(process.env.PORT) || 3000;
 const app = express();
 
+function publicacaoValida(titulo, conteudo) {
+    return (
+        typeof titulo === "string" &&
+        typeof conteudo === "string" &&
+        titulo.trim().length > 0 &&
+        conteudo.trim().length > 0 &&
+        titulo.trim().length <= 255
+    );
+}
+
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -121,13 +131,13 @@ app.get("/api/publicacoes", async function(req, res) {
 
 app.post("/api/publicacoes", exigirAutenticacao, exigirCsrf, async function(req, res) {
 
-    const { titulo, conteudo } = req.body;
+    const { titulo, conteudo } = req.body ?? {};
 
-    if (!titulo || !conteudo) {
-        return res.status(400).json({
-            erro: "Título e conteúdo são obrigatórios."
-        });
-    }
+    if (!publicacaoValida(titulo, conteudo)) {
+    return res.status(400).json({
+        erro: "Informe um título válido de até 255 caracteres e um conteúdo não vazio."
+    });
+}
 
     try {
         const resultado = await pool.query(
@@ -324,17 +334,17 @@ app.get("/api/csrf", exigirAutenticacao, function(req, res) {
 app.put("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async function(req, res) {
 
     const id = Number(req.params.id);
-    const { titulo, conteudo } = req.body;
+    const { titulo, conteudo } = req.body ?? {};
+
+    if (!publicacaoValida(titulo, conteudo)) {
+    return res.status(400).json({
+        erro: "Informe um título válido de até 255 caracteres e um conteúdo não vazio."
+    });
+}
 
     if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({
-            erro: "ID inválido."
-        });
-    }
-
-    if (!titulo || !conteudo) {
-        return res.status(400).json({
-            erro: "Título e conteúdo são obrigatórios."
+        erro: "ID inválido."
         });
     }
 
