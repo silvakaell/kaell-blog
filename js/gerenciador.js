@@ -106,7 +106,7 @@ function cancelarEdicao() {
 
     formulario.reset();
 
-    botaoPublicar.textContent = "Publicar texto";
+    botaoPublicar.textContent = "Publicar artigo";
     botaoCancelar.hidden = true;
 }
 
@@ -117,8 +117,16 @@ botaoCancelar.addEventListener("click", function() {
 });
 
 formulario.addEventListener("submit", async function(evento) {
+
     evento.preventDefault();
-    botaoPublicar.textContent = "Publicar artigo";
+    if (botaoPublicar.disabled) {
+    return;
+}
+
+botaoPublicar.disabled = true;
+botaoPublicar.textContent =
+    publicacaoEmEdicao !== null ? "Salvando..." : "Publicando...";
+    
 
  if (publicacaoEmEdicao !== null) {
     try {
@@ -162,6 +170,15 @@ formulario.addEventListener("submit", async function(evento) {
         console.error("Erro ao editar:", erro);
 
         alert(erro.message);
+    }   finally {
+        botaoPublicar.disabled = false;
+
+            botaoPublicar.textContent =
+        publicacaoEmEdicao !== null
+            ? "Salvar alterações"
+            : "Publicar artigo";
+
+        
     }
 
     return;
@@ -198,6 +215,13 @@ formulario.addEventListener("submit", async function(evento) {
     console.error("Erro ao publicar:", erro);
 
     alert(erro.message);
+} finally {
+    botaoPublicar.disabled = false;
+
+    botaoPublicar.textContent =
+        publicacaoEmEdicao !== null
+            ? "Salvar alterações"
+            : "Publicar artigo";
 }
 });
 
