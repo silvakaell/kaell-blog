@@ -41,6 +41,10 @@ function exibirPublicacao(publicacao) {
     botaoEditar.type = "button";
     
     botaoEditar.addEventListener("click", function() {
+
+        if (botaoPublicar.disabled) {
+        return;
+    }
     publicacaoEmEdicao = publicacao;
     artigoEmEdicao = novoArtigo;
 
@@ -50,6 +54,7 @@ function exibirPublicacao(publicacao) {
     botaoPublicar.textContent = "Salvar alterações";
     botaoCancelar.hidden = false;
 });
+ 
 
     novoArtigo.appendChild(botaoEditar);
 
@@ -59,6 +64,9 @@ function exibirPublicacao(publicacao) {
     botaoExcluir.type = "button";  
 
   botaoExcluir.addEventListener("click", async function() {
+    if (botaoPublicar.disabled) {
+        return;
+    }
 
     const confirmar = confirm("Tem certeza que deseja excluir este artigo?");
 
@@ -117,6 +125,7 @@ botaoCancelar.addEventListener("click", function() {
 });
 
 formulario.addEventListener("submit", async function(evento) {
+    
 
     evento.preventDefault();
     if (botaoPublicar.disabled) {
@@ -124,6 +133,7 @@ formulario.addEventListener("submit", async function(evento) {
 }
 
 botaoPublicar.disabled = true;
+botaoCancelar.disabled = true;
 botaoPublicar.textContent =
     publicacaoEmEdicao !== null ? "Salvando..." : "Publicando...";
     
@@ -172,6 +182,7 @@ botaoPublicar.textContent =
         alert(erro.message);
     }   finally {
         botaoPublicar.disabled = false;
+        botaoCancelar.disabled = false;
 
             botaoPublicar.textContent =
         publicacaoEmEdicao !== null
@@ -217,7 +228,7 @@ botaoPublicar.textContent =
     alert(erro.message);
 } finally {
     botaoPublicar.disabled = false;
-
+    botaoCancelar.disabled = false;
     botaoPublicar.textContent =
         publicacaoEmEdicao !== null
             ? "Salvar alterações"
