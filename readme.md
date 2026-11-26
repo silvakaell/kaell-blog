@@ -69,10 +69,7 @@ Os ambientes possuem bancos de dados independentes.
 - Proteção de rotas e requisições
 - Armazenamento persistente no PostgreSQL
 
-## Guia de manutenção
 
-Consulte [README_MANUTENCAO_KAELL_BLOG.md](README_MANUTENCAO_KAELL_BLOG.md)
-para entender como atualizar e administrar o blog.
 
 ## Prévia do projeto
 
