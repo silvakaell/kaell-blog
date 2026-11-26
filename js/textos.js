@@ -12,7 +12,7 @@ async function carregarPublicacoesBlog() {
 
         const publicacoes = await resposta.json();
 
-        publicacoes.forEach(function(publicacao) {
+        publicacoes.forEach(function (publicacao) {
             const artigo = document.createElement("article");
 
             const titulo = document.createElement("h3");
@@ -20,24 +20,24 @@ async function carregarPublicacoesBlog() {
 
             const data = document.createElement("time");
 
-                data.textContent = new Date(
-                    publicacao.criado_em
-                ).toLocaleDateString("pt-BR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    timeZone: "America/Fortaleza"
-                });
+            data.textContent = new Date(
+                publicacao.criado_em
+            ).toLocaleDateString("pt-BR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: "America/Fortaleza"
+            });
 
             titulo.textContent = publicacao.titulo;
             const limiteResumo = 150;
 
-                if (publicacao.conteudo.length > limiteResumo) {
-                    conteudo.textContent =
-                        publicacao.conteudo.slice(0, limiteResumo).trimEnd() + "...";
-                } else {
-                    conteudo.textContent = publicacao.conteudo;
-                }
+            if (publicacao.conteudo.length > limiteResumo) {
+                conteudo.textContent =
+                    publicacao.conteudo.slice(0, limiteResumo).trimEnd() + "...";
+            } else {
+                conteudo.textContent = publicacao.conteudo;
+            }
 
             const linkArtigo = document.createElement("a");
 

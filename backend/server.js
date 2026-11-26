@@ -89,34 +89,34 @@ const limitarLogin = rateLimit({
 });
 
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
     res.redirect("/index.html");
 });
 
-app.get("/index.html", function(req, res) {
+app.get("/index.html", function (req, res) {
     res.sendFile(
         fileURLToPath(new URL("../index.html", import.meta.url))
     );
 });
 
-app.get("/projetos.html", function(req, res) {
+app.get("/projetos.html", function (req, res) {
     res.sendFile(
         fileURLToPath(new URL("../projetos.html", import.meta.url))
     );
 });
 
-app.get("/sobre.html", function(req, res) {
+app.get("/sobre.html", function (req, res) {
     res.sendFile(
         fileURLToPath(new URL("../sobre.html", import.meta.url))
     );
 });
 
 
-app.get("/api/publicacoes", async function(req, res) {
+app.get("/api/publicacoes", async function (req, res) {
     try {
         const resultado = await pool.query(
-    "SELECT * FROM publicacoes ORDER BY criado_em DESC, id DESC"
-);
+            "SELECT * FROM publicacoes ORDER BY criado_em DESC, id DESC"
+        );
 
         res.json(resultado.rows);
 
@@ -129,15 +129,15 @@ app.get("/api/publicacoes", async function(req, res) {
     }
 });
 
-app.post("/api/publicacoes", exigirAutenticacao, exigirCsrf, async function(req, res) {
+app.post("/api/publicacoes", exigirAutenticacao, exigirCsrf, async function (req, res) {
 
     const { titulo, conteudo } = req.body ?? {};
 
     if (!publicacaoValida(titulo, conteudo)) {
-    return res.status(400).json({
-        erro: "Informe um título válido de até 255 caracteres e um conteúdo não vazio."
-    });
-}
+        return res.status(400).json({
+            erro: "Informe um título válido de até 255 caracteres e um conteúdo não vazio."
+        });
+    }
 
     try {
         const resultado = await pool.query(
@@ -158,7 +158,7 @@ app.post("/api/publicacoes", exigirAutenticacao, exigirCsrf, async function(req,
     }
 });
 
-app.get("/api/publicacoes/:id", async function(req, res) {
+app.get("/api/publicacoes/:id", async function (req, res) {
 
     const id = Number(req.params.id);
 
@@ -191,7 +191,7 @@ app.get("/api/publicacoes/:id", async function(req, res) {
     }
 });
 
-app.post("/api/login", limitarLogin, async function(req, res) {
+app.post("/api/login", limitarLogin, async function (req, res) {
     const { usuario, senha } = req.body;
 
     if (typeof usuario !== "string" ||
@@ -227,7 +227,7 @@ app.post("/api/login", limitarLogin, async function(req, res) {
             });
         }
 
-        req.session.regenerate(function(erro) {
+        req.session.regenerate(function (erro) {
             if (erro) {
                 return res.status(500).json({
                     erro: "Erro ao iniciar sessão."
@@ -236,7 +236,7 @@ app.post("/api/login", limitarLogin, async function(req, res) {
 
             req.session.adminId = administrador.id;
 
-            req.session.save(function(erro) {
+            req.session.save(function (erro) {
                 if (erro) {
                     return res.status(500).json({
                         erro: "Erro ao salvar sessão."
@@ -259,9 +259,9 @@ app.post("/api/login", limitarLogin, async function(req, res) {
     }
 });
 
-app.post("/api/logout", exigirAutenticacao, exigirCsrf, function(req, res) {
+app.post("/api/logout", exigirAutenticacao, exigirCsrf, function (req, res) {
 
-    req.session.destroy(function(erro) {
+    req.session.destroy(function (erro) {
 
         if (erro) {
             return res.status(500).json({
@@ -277,7 +277,7 @@ app.post("/api/logout", exigirAutenticacao, exigirCsrf, function(req, res) {
     });
 });
 
-app.get("/api/me", function(req, res) {
+app.get("/api/me", function (req, res) {
 
     if (!req.session.adminId) {
         return res.status(401).json({
@@ -319,7 +319,7 @@ function exigirCsrf(req, res, next) {
     next();
 }
 
-app.get("/api/csrf", exigirAutenticacao, function(req, res) {
+app.get("/api/csrf", exigirAutenticacao, function (req, res) {
 
     if (!req.session.csrfToken) {
         req.session.csrfToken = randomBytes(32).toString("hex");
@@ -331,20 +331,20 @@ app.get("/api/csrf", exigirAutenticacao, function(req, res) {
         csrfToken: req.session.csrfToken
     });
 });
-app.put("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async function(req, res) {
+app.put("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async function (req, res) {
 
     const id = Number(req.params.id);
     const { titulo, conteudo } = req.body ?? {};
 
     if (!publicacaoValida(titulo, conteudo)) {
-    return res.status(400).json({
-        erro: "Informe um título válido de até 255 caracteres e um conteúdo não vazio."
-    });
-}
+        return res.status(400).json({
+            erro: "Informe um título válido de até 255 caracteres e um conteúdo não vazio."
+        });
+    }
 
     if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({
-        erro: "ID inválido."
+            erro: "ID inválido."
         });
     }
 
@@ -375,7 +375,7 @@ app.put("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async function(r
 });
 
 
-app.delete("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async function(req, res) {
+app.delete("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async function (req, res) {
 
     const id = Number(req.params.id);
 
@@ -411,7 +411,7 @@ app.delete("/api/publicacoes/:id", exigirAutenticacao, exigirCsrf, async functio
         });
     }
 });
-app.get("/gerenciador.html", function(req, res) {
+app.get("/gerenciador.html", function (req, res) {
 
     if (!req.session.adminId) {
         return res.redirect("/login.html");
@@ -424,7 +424,7 @@ app.get("/gerenciador.html", function(req, res) {
     );
 });
 
-app.get("/textos.html", function(req, res) {
+app.get("/textos.html", function (req, res) {
     res.sendFile(
         fileURLToPath(
             new URL("../textos.html", import.meta.url)
@@ -432,7 +432,7 @@ app.get("/textos.html", function(req, res) {
     );
 });
 
-app.get("/artigo.html", function(req, res) {
+app.get("/artigo.html", function (req, res) {
     res.sendFile(
         fileURLToPath(
             new URL("../artigo.html", import.meta.url)
@@ -440,7 +440,7 @@ app.get("/artigo.html", function(req, res) {
     );
 });
 
-app.get("/login.html", function(req, res) {
+app.get("/login.html", function (req, res) {
     res.sendFile(
         fileURLToPath(
             new URL("../login.html", import.meta.url)
@@ -449,6 +449,6 @@ app.get("/login.html", function(req, res) {
 });
 
 
-app.listen(rota, function() {
+app.listen(rota, function () {
     console.log(`Servidor rodando na porta ${rota}!`);
 });

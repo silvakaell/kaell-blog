@@ -1,7 +1,7 @@
 const formularioLogin = document.querySelector("#form-login");
 const mensagemLogin = document.querySelector("#mensagem-login");
 
-formularioLogin.addEventListener("submit", async function(evento) {
+formularioLogin.addEventListener("submit", async function (evento) {
     evento.preventDefault();
 
     const usuario = document.querySelector("#usuario").value;
