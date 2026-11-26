@@ -5,6 +5,7 @@ const listaPublicacoes = document.querySelector("#lista-publicacoes");
 const botaoPublicar = formulario.querySelector('button[type="submit"]');
 const botaoCancelar = document.querySelector("#btn-cancelar");
 
+
 let publicacaoEmEdicao = null
 let artigoEmEdicao = null
 
@@ -181,19 +182,27 @@ formulario.addEventListener("submit", async function(evento) {
 
 
 async function carregarPublicacoes() {
+    try {
+        const resposta = await fetch("/api/publicacoes");
 
-    const resposta = await fetch("/api/publicacoes");
+        if (!resposta.ok) {
+            throw new Error("Erro ao buscar publicações.");
+        }
 
-    const dados = await resposta.json();
+        const dados = await resposta.json();
 
-    dados.forEach(function(publicacao) {
-    exibirPublicacao(publicacao);
+        dados.forEach(function(publicacao) {
+            exibirPublicacao(publicacao);
+        });
 
-});
+    } catch (erro) {
+        console.error("Erro ao carregar artigos:", erro);
 
-    console.log("Publicações recebidas da API:", dados);
-
+        listaPublicacoes.textContent =
+            "Não foi possível carregar as publicações. Tente novamente.";
+    }
 }
+
 
 const botaoSair = document.querySelector("#btn-sair");
 
