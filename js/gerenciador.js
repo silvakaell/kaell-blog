@@ -58,33 +58,40 @@ function exibirPublicacao(publicacao) {
     botaoExcluir.textContent = "Excluir";
     botaoExcluir.type = "button";  
 
-    botaoExcluir.addEventListener("click", async function() {
+  botaoExcluir.addEventListener("click", async function() {
 
     const confirmar = confirm("Tem certeza que deseja excluir este artigo?");
 
     if (!confirmar) {
         return;
     }
-    const csrfToken = await obterTokenCsrf();
-    const resposta = await fetch(
-        `/api/publicacoes/${publicacao.id}`,
-        {
-            method: "DELETE",
-            headers: {
-            "X-CSRF-Token": csrfToken,
+
+    try {
+        const csrfToken = await obterTokenCsrf();
+
+        const resposta = await fetch(
+            `/api/publicacoes/${publicacao.id}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "X-CSRF-Token": csrfToken
+                }
+            }
+        );
+
+        if (!resposta.ok) {
+            throw new Error("Não foi possível excluir o artigo.");
         }
+
+        novoArtigo.remove();
+
+        if (publicacaoEmEdicao === publicacao) {
+            cancelarEdicao();
         }
-    );
 
-    if (!resposta.ok) {
-        console.error("Erro ao excluir:", resposta.status);
-        return;
-    }
-
-    novoArtigo.remove();
-
-    if (publicacaoEmEdicao === publicacao) {
-        cancelarEdicao();
+    } catch (erro) {
+        console.error("Erro ao excluir:", erro);
+        alert("Não foi possível excluir o artigo. Tente novamente.");
     }
 });
 
@@ -113,62 +120,68 @@ formulario.addEventListener("submit", async function(evento) {
     evento.preventDefault();
     botaoPublicar.textContent = "Publicar artigo";
 
-   if (publicacaoEmEdicao !== null) {
+ if (publicacaoEmEdicao !== null) {
+    try {
+        const csrfToken = await obterTokenCsrf();
 
-    const csrfToken = await obterTokenCsrf();
-    const resposta = await fetch(
-        `/api/publicacoes/${publicacaoEmEdicao.id}`,
-        {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-Token": csrfToken
-                
-            },
-            body: JSON.stringify({
-                titulo: campoTitulo.value,
-                conteudo: campoConteudo.value
-            })
+        const resposta = await fetch(
+            `/api/publicacoes/${publicacaoEmEdicao.id}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": csrfToken
+                },
+                body: JSON.stringify({
+                    titulo: campoTitulo.value,
+                    conteudo: campoConteudo.value
+                })
+            }
+        );
+
+        if (!resposta.ok) {
+            throw new Error("Não foi possível editar o artigo.");
         }
-    );
 
-    if (!resposta.ok) {
-        console.error("Erro ao editar:", resposta.status);
-        return;
+        const publicacaoAtualizada = await resposta.json();
+
+        publicacaoEmEdicao.titulo = publicacaoAtualizada.titulo;
+        publicacaoEmEdicao.conteudo = publicacaoAtualizada.conteudo;
+
+        artigoEmEdicao.querySelector("h3").textContent =
+            publicacaoAtualizada.titulo;
+
+        artigoEmEdicao.querySelector("p").textContent =
+            publicacaoAtualizada.conteudo;
+
+        cancelarEdicao();
+
+    } catch (erro) {
+        console.error("Erro ao editar:", erro);
+
+        alert("Não foi possível editar o artigo. Tente novamente.");
     }
-
-    const publicacaoAtualizada = await resposta.json();
-
-    publicacaoEmEdicao.titulo = publicacaoAtualizada.titulo;
-    publicacaoEmEdicao.conteudo = publicacaoAtualizada.conteudo;
-
-    artigoEmEdicao.querySelector("h3").textContent =
-        publicacaoAtualizada.titulo;
-
-    artigoEmEdicao.querySelector("p").textContent =
-        publicacaoAtualizada.conteudo;
-
-    cancelarEdicao();
 
     return;
 }
+
+    try {
     const csrfToken = await obterTokenCsrf();
 
     const resposta = await fetch("/api/publicacoes", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken
-    },
-    body: JSON.stringify({
-        titulo: campoTitulo.value,
-        conteudo: campoConteudo.value
-    })
-});
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrfToken
+        },
+        body: JSON.stringify({
+            titulo: campoTitulo.value,
+            conteudo: campoConteudo.value
+        })
+    });
 
     if (!resposta.ok) {
-        console.error("Erro ao publicar:", resposta.status);
-        return;
+        throw new Error("Não foi possível publicar o artigo.");
     }
 
     const novaPublicacao = await resposta.json();
@@ -176,6 +189,12 @@ formulario.addEventListener("submit", async function(evento) {
     exibirPublicacao(novaPublicacao);
 
     formulario.reset();
+
+} catch (erro) {
+    console.error("Erro ao publicar:", erro);
+
+    alert("Não foi possível publicar o artigo. Tente novamente.");
+}
 });
 
    
