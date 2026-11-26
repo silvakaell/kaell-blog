@@ -196,7 +196,13 @@ main h1 {
 #lista-textos-recentes article {
     margin-bottom: 20px;
 }
+.projetos article a + a {
+    margin-left: 16px;
+}
 
+.projetos article {
+    margin-bottom: 32px;
+}
 @media (max-width: 600px) {
     header {
         flex-direction: column;
